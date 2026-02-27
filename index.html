@@ -1,199 +1,231 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BiteConnect | AI Food Logic</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #f3f4f6; color: #1f2937; }
-        .card { background: white; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
-        .stat-card { border-top: 4px solid #10b981; }
-        .flag-active { border-top: 4px solid #ef4444; background-color: #fef2f2; }
-        .btn-action { background-color: #10b981; color: white; transition: all 0.2s; }
-        .btn-action:hover { background-color: #059669; transform: translateY(-1px); }
-    </style>
+<meta charset="UTF-8">
+<title>BiteConnect | AI Supply Intelligence</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="p-6 lg:p-12">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="flex justify-between items-center mb-8">
-            <div>
-                <h1 class="text-3xl font-bold text-gray-900">BiteConnect <span class="text-emerald-600">AI</span></h1>
-                <p class="text-gray-500">Intelligent Supply Chain & Social Redistribution</p>
-            </div>
-            <div class="text-right">
-                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full">SYSTEM ACTIVE</span>
-            </div>
-        </header>
+<body class="bg-gray-100 text-gray-800 p-6 lg:p-12">
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            
-            <div class="lg:col-span-1">
-                <div class="card p-6 sticky top-8">
-                    <h2 class="text-lg font-bold mb-4 border-b pb-2">Control Panel</h2>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase">Historical Data (CSV)</label>
-                            <input type="file" id="csvFile" class="block w-full text-sm text-gray-500 mt-1 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:bg-emerald-50 file:text-emerald-700">
-                        </div>
-                        <div>
-                            <label class="text-xs font-bold text-gray-400 uppercase">Menu Item</label>
-                            <input type="text" id="menuItem" placeholder="e.g. Butter Croissant" class="w-full border p-2 rounded-md mt-1" value="Butter Croissant">
-                        </div>
-                        <div class="grid grid-cols-2 gap-4">
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Day</label>
-                                <select id="day" class="w-full border p-2 rounded-md mt-1">
-                                    <option>Monday</option><option>Tuesday</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label class="text-xs font-bold text-gray-400 uppercase">Weather</label>
-                                <select id="weather" class="w-full border p-2 rounded-md mt-1">
-                                    <option>Sunny</option><option>Rainy</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="flex items-center gap-2 py-2">
-                            <input type="checkbox" id="localEvent" class="w-4 h-4 accent-emerald-500">
-                            <span class="text-sm font-medium">Local Event Today?</span>
-                        </div>
-                        <button onclick="analyzeBiteConnect()" class="btn-action w-full py-3 rounded-md font-bold shadow-lg">RUN AI ANALYSIS</button>
-                    </div>
-                </div>
-            </div>
+<div class="max-w-7xl mx-auto">
 
-            <div class="lg:col-span-2 space-y-6">
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="card p-6 stat-card">
-                        <p class="text-xs font-bold text-gray-400 uppercase">Daily Prediction</p>
-                        <div class="text-4xl font-bold mt-1" id="forecastVal">--</div>
-                        <p class="text-xs text-emerald-600 font-medium mt-2">AI Suggested Prep Level</p>
-                    </div>
-                    <div id="flagCard" class="card p-6 border-t-4 border-gray-200">
-                        <p class="text-xs font-bold text-gray-400 uppercase">Active Flags</p>
-                        <div class="text-4xl font-bold mt-1" id="flagCount">0</div>
-                        <p class="text-xs mt-2" id="flagMsg">No issues detected.</p>
-                    </div>
-                </div>
-
-                <div class="card p-6">
-                    <h3 class="font-bold text-gray-800 mb-4 flex items-center gap-2">
-                        📋 Inventory & Restock Status
-                    </h3>
-                    <div class="overflow-hidden border rounded-lg">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Item</th>
-                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">On Hand</th>
-                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Required</th>
-                                    <th class="px-4 py-2 text-left text-xs font-bold text-gray-500 uppercase">Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="inventoryBody" class="divide-y divide-gray-200">
-                                <tr>
-                                    <td class="px-4 py-3 text-sm" id="rowItem">--</td>
-                                    <td class="px-4 py-3 text-sm font-bold" id="rowStock">--</td>
-                                    <td class="px-4 py-3 text-sm" id="rowReq">--</td>
-                                    <td class="px-4 py-3 text-sm" id="rowStatus">--</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card p-6 bg-emerald-50 border-emerald-200 border">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-bold text-emerald-900">Surplus Redistribution</h3>
-                            <p class="text-sm text-emerald-700 mt-1">Ready for social donation match.</p>
-                        </div>
-                        <div class="text-right">
-                            <div class="text-3xl font-bold text-emerald-600" id="surplusQty">0</div>
-                            <p class="text-[10px] font-bold uppercase text-emerald-500">Units</p>
-                        </div>
-                    </div>
-                    <div class="mt-4 p-4 bg-white rounded-lg border border-emerald-100 flex justify-between items-center">
-                        <div>
-                            <p class="text-xs font-bold text-gray-400">ASSIGNED NGO</p>
-                            <p class="font-bold text-gray-800" id="ngoName">Waiting...</p>
-                        </div>
-                        <button onclick="confirmDonation()" id="donateBtn" class="hidden px-4 py-2 bg-emerald-600 text-white text-xs font-bold rounded hover:bg-emerald-700">CONFIRM DISPATCH</button>
-                    </div>
-                </div>
-
-                <div class="p-4 bg-gray-800 text-gray-300 rounded-lg text-sm italic shadow-inner">
-                    <strong>AI Insight:</strong> <span id="reasoning">Adjust parameters to generate operational insights.</span>
-                </div>
-            </div>
-        </div>
+<!-- HEADER -->
+<div class="flex justify-between items-center mb-10">
+    <div>
+        <h1 class="text-4xl font-bold">
+            BiteConnect <span class="text-emerald-600">AI</span>
+        </h1>
+        <p class="text-gray-500 mt-1">
+            Smart Inventory Forecasting & Redistribution Engine
+        </p>
     </div>
+    <span class="bg-emerald-100 text-emerald-700 px-4 py-1 rounded-full text-xs font-bold">
+        SYSTEM ONLINE
+    </span>
+</div>
 
-    <script>
-        async function analyzeBiteConnect() {
-            const formData = new FormData();
-            formData.append("menu_item", document.getElementById("menuItem").value);
-            formData.append("day", document.getElementById("day").value);
-            formData.append("weather", document.getElementById("weather").value);
-            formData.append("event", document.getElementById("localEvent").checked);
-            
-            const file = document.getElementById("csvFile").files[0];
-            if(file) formData.append("file", file);
+<div class="grid lg:grid-cols-3 gap-8">
 
-            try {
-                const res = await fetch("http://localhost:8000/analyze/", { method: "POST", body: formData });
-                const data = await res.json();
+<!-- CONTROL PANEL -->
+<div class="bg-white rounded-2xl shadow p-6 space-y-6">
 
-                // 1. Predictions
-                document.getElementById("forecastVal").innerText = data.prediction.forecast_value + " units";
-                document.getElementById("reasoning").innerText = data.prediction.reasoning;
+<h2 class="text-lg font-bold border-b pb-2">Upload Data</h2>
 
-                // 2. Flags & Out of Stock Logic
-                const flagCard = document.getElementById("flagCard");
-                const flagCount = document.getElementById("flagCount");
-                const flagMsg = document.getElementById("flagMsg");
+<div>
+<label class="text-xs font-bold text-gray-400 uppercase">Sales CSV</label>
+<input type="file" id="salesFile"
+class="mt-2 block w-full text-sm file:bg-emerald-50 file:text-emerald-700 file:px-4 file:py-2 file:rounded-full file:border-0">
+</div>
 
-                if (data.inventory.alert) {
-                    flagCard.className = "card p-6 flag-active";
-                    flagCount.innerText = "1";
-                    flagCount.classList.add("text-red-600");
-                    flagMsg.innerText = "CRITICAL: Stock below required prep.";
-                    document.getElementById("rowStatus").innerHTML = '<span class="text-red-600 font-bold">⚠️ OUT OF STOCK</span>';
-                } else {
-                    flagCard.className = "card p-6 stat-card";
-                    flagCount.innerText = "0";
-                    flagCount.classList.remove("text-red-600");
-                    flagMsg.innerText = "No issues detected.";
-                    document.getElementById("rowStatus").innerHTML = '<span class="text-emerald-600 font-bold">✅ STABLE</span>';
-                }
+<div>
+<label class="text-xs font-bold text-gray-400 uppercase">Inventory CSV</label>
+<input type="file" id="inventoryFile"
+class="mt-2 block w-full text-sm file:bg-emerald-50 file:text-emerald-700 file:px-4 file:py-2 file:rounded-full file:border-0">
+</div>
 
-                // 3. Inventory Table
-                document.getElementById("rowItem").innerText = document.getElementById("menuItem").value;
-                document.getElementById("rowStock").innerText = data.inventory.stock_level;
-                document.getElementById("rowReq").innerText = data.prediction.forecast_value;
+<button onclick="analyzeBiteConnect()"
+id="analyzeBtn"
+class="w-full bg-emerald-600 text-white py-3 rounded-xl font-bold hover:bg-emerald-700 transition">
+RUN AI ANALYSIS
+</button>
 
-                // 4. Surplus & NGO
-                document.getElementById("surplusQty").innerText = data.social.surplus;
-                document.getElementById("ngoName").innerText = data.social.ngo_match;
-                
-                const btn = document.getElementById("donateBtn");
-                if(data.social.surplus > 0) {
-                    btn.classList.remove("hidden");
-                } else {
-                    btn.classList.add("hidden");
-                }
+<div id="loadingText" class="hidden text-sm text-emerald-600 font-medium">
+Running AI Analysis...
+</div>
 
-            } catch (err) {
-                alert("Please ensure the BiteConnect Backend (FastAPI) is running.");
-            }
-        }
+</div>
 
-        function confirmDonation() {
-            alert("Success! Redistribution order sent to " + document.getElementById("ngoName").innerText);
-        }
-    </script>
+<!-- RESULTS -->
+<div class="lg:col-span-2 space-y-6">
+
+<!-- KPI CARDS -->
+<div class="grid md:grid-cols-3 gap-6">
+
+<div class="bg-white rounded-2xl shadow p-6 border-t-4 border-red-500">
+<p class="text-xs uppercase text-gray-400 font-bold">Restock Alerts</p>
+<div id="restockCount" class="text-4xl font-bold mt-2">0</div>
+</div>
+
+<div class="bg-white rounded-2xl shadow p-6 border-t-4 border-emerald-500">
+<p class="text-xs uppercase text-gray-400 font-bold">Surplus Items</p>
+<div id="surplusCount" class="text-4xl font-bold mt-2">0</div>
+</div>
+
+<div class="bg-white rounded-2xl shadow p-6 border-t-4 border-blue-500">
+<p class="text-xs uppercase text-gray-400 font-bold">AI Confidence</p>
+<div id="confidenceValue" class="text-4xl font-bold mt-2">0%</div>
+</div>
+
+</div>
+
+<!-- INVENTORY TABLE -->
+<div class="bg-white rounded-2xl shadow p-6">
+<h3 class="font-bold mb-4">Inventory Overview</h3>
+<table class="w-full text-sm">
+<thead class="bg-gray-50 text-gray-500 uppercase text-xs">
+<tr>
+<th class="p-3 text-left">Item</th>
+<th class="p-3 text-left">Stock</th>
+<th class="p-3 text-left">Status</th>
+</tr>
+</thead>
+<tbody id="inventoryTable">
+<tr class="border-t">
+<td class="p-3">--</td>
+<td class="p-3">--</td>
+<td class="p-3">--</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<!-- SOCIAL -->
+<div class="bg-emerald-50 rounded-2xl shadow p-6 border border-emerald-200">
+<h3 class="font-bold text-emerald-900">Surplus Redistribution</h3>
+<div class="mt-3 flex justify-between">
+<div>
+<p class="text-xs text-gray-400 uppercase font-bold">Assigned NGO</p>
+<p id="ngoName" class="font-bold">Food Relief Foundation</p>
+</div>
+<div>
+<div id="surplusQty" class="text-3xl font-bold text-emerald-600">0</div>
+<p class="text-xs uppercase text-emerald-500 font-bold">Units</p>
+</div>
+</div>
+</div>
+
+<!-- AI INSIGHT -->
+<div class="bg-gray-900 text-gray-300 rounded-2xl p-6 text-sm">
+<strong>AI Strategic Insight:</strong>
+<p id="reasoning" class="mt-3 whitespace-pre-line">
+Awaiting analysis...
+</p>
+</div>
+
+</div>
+</div>
+</div>
+
+<script>
+
+async function analyzeBiteConnect() {
+
+const btn = document.getElementById("analyzeBtn");
+const loading = document.getElementById("loadingText");
+
+btn.disabled = true;
+loading.classList.remove("hidden");
+
+const sales = document.getElementById("salesFile").files[0];
+const inventory = document.getElementById("inventoryFile").files[0];
+
+if (!sales || !inventory) {
+alert("Please upload both CSV files.");
+btn.disabled = false;
+loading.classList.add("hidden");
+return;
+}
+
+const formData = new FormData();
+formData.append("sales_file", sales);
+formData.append("inventory_file", inventory);
+
+try {
+
+const res = await fetch("http://localhost:8000/analyze", {
+method: "POST",
+body: formData
+});
+
+const data = await res.json();
+
+console.log("Backend Response:", data);
+
+// KPI updates
+document.getElementById("restockCount").innerText =
+data.restock_alerts.length;
+
+document.getElementById("surplusCount").innerText =
+data.surplus_items.length;
+
+document.getElementById("confidenceValue").innerText =
+data.confidence_score + "%";
+
+// Inventory table update
+let tableHTML = "";
+
+data.restock_alerts.forEach(item => {
+tableHTML += `
+<tr class="border-t">
+<td class="p-3">${item.item}</td>
+<td class="p-3">${item.current_stock}</td>
+<td class="p-3 text-red-600 font-bold">RESTOCK</td>
+</tr>`;
+});
+
+data.surplus_items.forEach(item => {
+tableHTML += `
+<tr class="border-t">
+<td class="p-3">${item.item}</td>
+<td class="p-3">${item.current_stock}</td>
+<td class="p-3 text-emerald-600 font-bold">SURPLUS</td>
+</tr>`;
+});
+
+if (tableHTML === "") {
+tableHTML = `
+<tr class="border-t">
+<td class="p-3">All Items</td>
+<td class="p-3">Stable</td>
+<td class="p-3 text-emerald-600 font-bold">OK</td>
+</tr>`;
+}
+
+document.getElementById("inventoryTable").innerHTML = tableHTML;
+
+// Social
+let totalSurplus = 0;
+data.surplus_items.forEach(item => {
+totalSurplus += item.estimated_weekly_need;
+});
+document.getElementById("surplusQty").innerText = totalSurplus;
+
+// AI reasoning
+document.getElementById("reasoning").innerText =
+data.ai_plan;
+
+} catch (err) {
+alert("Backend not running or CORS issue.");
+console.error(err);
+}
+
+btn.disabled = false;
+loading.classList.add("hidden");
+}
+
+</script>
+
 </body>
 </html>
