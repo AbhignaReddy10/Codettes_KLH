@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from intelligence import get_prescriptive_json
 
 app = FastAPI()
 
@@ -25,6 +26,17 @@ def predict_waste(stock: int, demand: int):
     else:
         return {"risk": "Low Waste Risk"}
 
+@app.get("/")
+def home():
+    return {"status": "AI System Online"}
+
+# This is the part Member 3 will use
+@app.post("/calculate_impact")
+def calculate(item: str, weight: float):
+    # This runs your Biryani code and gives the result back to the website
+    result = get_prescriptive_json(item, weight)
+    return result
+    
 @app.get("/check-inventory")
 def check_inventory(stock: int):
     if stock < 40:
@@ -35,4 +47,5 @@ def check_inventory(stock: int):
 def match_ngo(surplus: int):
     if surplus > 50:
         return {"ngo": "Sunshine Orphanage"}
+
     return {"ngo": "No Distribution Needed"}
