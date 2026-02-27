@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BiteConnect| Smart Supply Chain</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.css">
+    <style>
+        body { max-width: 1200px; margin: 20px auto; background-color: #f8fafc; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-bottom: 20px; border-top: 4px solid #2ecc71; }
+        .pillar-card { border-top: 4px solid #3498db; }
+        .metric { font-size: 2rem; font-weight: bold; color: #2c3e50; margin: 10px 0; }
+        .label { font-size: 0.8rem; text-transform: uppercase; color: #7f8c8d; letter-spacing: 1px; }
+        .inventory-banner { padding: 15px; border-radius: 8px; margin-top: 10px; font-weight: bold; text-align: center; }
+        .log-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        .log-table th, .log-table td { padding: 12px; border-bottom: 1px solid #eee; text-align: left; }
+        .badge { padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold; }
+        .badge-prediction { background: #e1f5fe; color: #0288d1; }
+        .badge-inventory { background: #fff3e0; color: #f57c00; }
+        .badge-social { background: #e8f5e9; color: #2e7d32; }
+        #loader { display: none; text-align: center; margin: 10px 0; font-style: italic; color: #2ecc71; }
+    </style>
+</head>
+<body>
+
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <div>
+            <h1 style="margin: 0;">🍱 Eco-Kitchen AI</h1>
+            <p style="margin: 0; color: #7f8c8d;">Operational Intelligence & Social Impact System</p>
+        </div>
+        <div style="text-align: right;">
+            <div class="badge badge-social">LIVE NODE: SYSTEM ACTIVE</div>
+        </div>
+    </header>
+
+    <div class="dashboard-grid">
+        <section>
+            <div class="card">
+                <h3>📍 Operational Inputs</h3>
+                <label>Current Stock (Units)</label>
+                <input type="number" id="stock" placeholder="e.g. 150" value="100">
+                
+                <label>Manual Demand Estimate</label>
+                <input type="number" id="demand" placeholder="e.g. 120" value="80">
+                
+                <label>Sales History (CSV)</label>
+                <input type="file" id="csvFile">
+                
+                <button onclick="analyze()" style="width: 100%; margin-top: 20px;">🚀 Generate AI Plan</button>
+                <div id="loader">Processing data & matching NGOs...</div>
+            </div>
+
+            <div class="card pillar-card">
+                <h3>🤖 AI Reasoning</h3>
+                <p id="explanation" style="font-style: italic; color: #34495e;">Generate a plan to see AI insights.</p>
+            </div>
+        </section>
+
+        <section>
+            <div id="resultCard" style="display:none;">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="card pillar-card">
+                        <div class="label">Pillar 1: Demand Forecast</div>
+                        <div class="metric" id="forecast">0</div>
+                        <div class="badge badge-prediction">AI Predicted</div>
+                    </div>
+
+                    <div class="card pillar-card">
+                        <div class="label">Pillar 2: Surplus Food</div>
+                        <div class="metric" id="surplus" style="color: #e67e22;">0</div>
+                        <div id="ngo" style="font-weight: bold; color: #3498db;">No Match</div>
+                    </div>
+                </div>
+
+                <div class="card pillar-card">
+                    <div class="label">Pillar 3: Inventory Status</div>
+                    <div id="inventoryStatus" class="inventory-banner">
+                        Awaiting Analysis
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h3>📜 Automated Action Log</h3>
+                <table class="log-table">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Pillar</th>
+                            <th>Action Taken</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logBody">
+                        </tbody>
+                </table>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        async function analyze() {
+            const stock = document.getElementById("stock").value;
+            const demand = document.getElementById("demand").value;
+            const fileInput = document.getElementById("csvFile");
+            const loader = document.getElementById("loader");
+            const resultCard = document.getElementById("resultCard");
+
+            loader.style.display = "block";
+            
+            const formData = new FormData();
+            formData.append("stock", stock);
+            formData.append("demand", demand);
+            if(fileInput.files.length > 0) formData.append("file", fileInput.files[0]);
+
+            try {
+                const res = await fetch("http://127.0.0.1:8000/analyze/", {
+                    method: "POST",
+                    body: formData
+                });
+                const data = await res.json();
+
+                // Show Results
+                resultCard.style.display = "block";
+                loader.style.display = "none";
+
+                // Map Prediction
+                document.getElementById("forecast").innerText = data.prediction.forecast_value;
+
+                // Map Inventory
+                const invCard = document.getElementById("inventoryStatus");
+                invCard.innerText = data.inventory.msg;
+                invCard.style.backgroundColor = data.inventory.alert ? "#ffdce0" : "#dcfce7";
+                invCard.style.color = data.inventory.alert ? "#af233a" : "#166534";
+
+                // Map Redistribution
+                document.getElementById("surplus").innerText = data.redistribution.surplus + " Units";
+                document.getElementById("ngo").innerText = "Assigned: " + data.redistribution.ngo;
+                document.getElementById("explanation").innerText = data.redistribution.reason;
+
+                // Update Log
+                addToLog(data);
+
+            } catch (error) {
+                console.error("Error:", error);
+                loader.style.display = "none";
+                alert("FastAPI Error: Is the server running at localhost:8000?");
+            }
+        }
+
+        function addToLog(data) {
+            const logBody = document.getElementById("logBody");
+            const now = new Date().toLocaleTimeString();
+            
+            // Create rows for the log
+            const invRow = `<tr>
+                <td>${now}</td>
+                <td><span class="badge badge-inventory">Inventory</span></td>
+                <td>${data.inventory.msg}</td>
+                <td>Verified</td>
+            </tr>`;
+            
+            let socialRow = "";
+            if(data.redistribution.surplus > 0) {
+                socialRow = `<tr>
+                    <td>${now}</td>
+                    <td><span class="badge badge-social">Social</span></td>
+                    <td>Surplus matched with ${data.redistribution.ngo}</td>
+                    <td>Dispatched</td>
+                </tr>`;
+            }
+
+            // Insert at the top
+            logBody.innerHTML = invRow + socialRow + logBody.innerHTML;
+        }
+    </script>
+</body>
+</html>
